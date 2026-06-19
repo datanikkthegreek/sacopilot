@@ -37,5 +37,7 @@ def health() -> dict:
 
 
 from server.routes import agent as agent_routes  # noqa: E402
+from server.routes import mail as mail_routes  # noqa: E402
 
 app.include_router(agent_routes.router, prefix="/api")
+app.include_router(mail_routes.router, prefix="/api")
