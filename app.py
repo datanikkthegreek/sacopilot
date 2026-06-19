@@ -36,6 +36,6 @@ def health() -> dict:
     }
 
 
-# Routers are mounted in later phases:
-#   from server.routes import mail, meetings, agent
-#   app.include_router(agent.router, prefix="/api")
+from server.routes import agent as agent_routes  # noqa: E402
+
+app.include_router(agent_routes.router, prefix="/api")
