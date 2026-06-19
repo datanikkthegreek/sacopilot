@@ -4,6 +4,14 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+# --- Endpoint ----------------------------------------------------------------
+# Target the Databricks AI Gateway. Set these in the environment (the Anthropic
+# SDK reads ANTHROPIC_BASE_URL + the token automatically):
+#   ANTHROPIC_BASE_URL=https://adb-7405607030687545.5.azuredatabricks.net/ai-gateway/anthropic
+#   ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN = a token for that workspace
+# Structured outputs aren't supported on the gateway; the classifier falls back
+# to a JSON-prompt path automatically.
+
 # --- Model -------------------------------------------------------------------
 # Spec model is claude-opus-4-8. Some endpoints prefix model IDs: the Databricks
 # AI Gateway serves it as `databricks-claude-opus-4-8`. Auto-detect from the
