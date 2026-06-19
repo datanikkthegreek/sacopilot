@@ -84,3 +84,19 @@ export async function listMail(query = "in:inbox", max = 30): Promise<MailItem[]
   if (!r.ok) throw new Error(`mail/list ${r.status}`);
   return r.json();
 }
+
+// --- Meetings --------------------------------------------------------------
+export interface MeetingItem {
+  id: string;
+  summary: string;
+  start: string;
+  end: string;
+  attendees: string[];
+  hangout?: string;
+}
+
+export async function listMeetingsToday(): Promise<MeetingItem[]> {
+  const r = await fetch("/api/meetings/today");
+  if (!r.ok) throw new Error(`meetings/today ${r.status}`);
+  return r.json();
+}
