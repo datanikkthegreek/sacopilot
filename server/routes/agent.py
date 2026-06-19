@@ -20,8 +20,11 @@ class MessageRequest(BaseModel):
 @router.post("/agent/message")
 async def agent_message(req: MessageRequest) -> StreamingResponse:
     async def event_stream():
-        async for event in agent.run(req.message, req.history):
-            yield f"data: {json.dumps(event, default=str)}\n\n"
+        try:
+            async for event in agent.run(req.message, req.history):
+                yield f"data: {json.dumps(event, default=str)}\n\n"
+        except Exception as e:  # never drop the stream silently
+            yield f"data: {json.dumps({'type': 'error', 'message': f'{type(e).__name__}: {e}'})}\n\n"
         yield "data: {\"type\": \"end\"}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
