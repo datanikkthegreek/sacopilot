@@ -5,7 +5,16 @@ import os
 from pathlib import Path
 
 # --- Model -------------------------------------------------------------------
-MODEL = "claude-opus-4-8"  # adaptive thinking, streaming (see server/agent.py)
+# Spec model is claude-opus-4-8. Some endpoints prefix model IDs: the Databricks
+# AI Gateway serves it as `databricks-claude-opus-4-8`. Auto-detect from the
+# base URL, override with SACOPILOT_MODEL.
+def _default_model() -> str:
+    base = os.environ.get("ANTHROPIC_BASE_URL", "")
+    if "databricks" in base or "ai-gateway" in base:
+        return "databricks-claude-opus-4-8"
+    return "claude-opus-4-8"
+
+MODEL = os.environ.get("SACOPILOT_MODEL", _default_model())
 
 # --- Anthropic ---------------------------------------------------------------
 # Key resolved from the environment by the Anthropic SDK (ANTHROPIC_API_KEY or

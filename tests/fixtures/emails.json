@@ -1,0 +1,51 @@
+[
+  {
+    "name": "bosch_pt_action_urgent",
+    "subject": "PT BW Migration — R3 data blocker, need your input today",
+    "from": "Ivana Manojlovic <ivana.manojlovic@bosch.com>",
+    "body": "Hi Nikk, the R3 data product generator is failing in PROD and the team is blocked. Can you join a call this afternoon to help unblock? This is urgent.",
+    "expect": {"org": "Customer", "type": "Action", "bosch": "Escalation", "bu_includes": "PT", "prio_max": "1"}
+  },
+  {
+    "name": "bosch_cdp_usecase",
+    "subject": "Marketing CDP — shopping cart abandoner use case scoping",
+    "from": "Alicja Sipowicz <alicja.sipowicz@bosch.com>",
+    "body": "Sharing the use-case requirements for the cart abandoner flow we discussed. No rush, review when you can this week.",
+    "expect": {"org": "Customer", "bosch": "Use-Case", "bu_includes": "PT"}
+  },
+  {
+    "name": "dbx_marketing",
+    "subject": "[Databricks] New GenAI campaign assets available",
+    "from": "Databricks Field Marketing <marketing@databricks.com>",
+    "body": "Check out the latest AI & GenAI campaign materials for your customer conversations. FYI only.",
+    "expect": {"org": "Internal", "dbx": "Marketing", "type": "Informative"}
+  },
+  {
+    "name": "dbx_people_1on1",
+    "subject": "1:1 next week + your growth plan",
+    "from": "Sven Piekowski <sven.piekowski@databricks.com>",
+    "body": "Let's use next week's 1:1 to talk through your H2 growth goals and the mentoring you've been doing.",
+    "expect": {"org": "Internal", "dbx": "People"}
+  },
+  {
+    "name": "partner_braze",
+    "subject": "Braze <> Bosch: Currents connector docs",
+    "from": "Steven Gormly <steven.gormly@braze.com>",
+    "body": "As promised, here is the Currents to Azure Blob documentation for the Bosch PT CDP integration.",
+    "expect": {"org": "Partner"}
+  },
+  {
+    "name": "bosch_pt_operation_routine",
+    "subject": "PT workspace — service principal access request for the data hub",
+    "from": "Isidora Kojcic <isidora.kojcic@bosch.com>",
+    "body": "Hi Nikk, could you grant the new service principal read access to the Power Tools data hub catalog when you get a chance this week? Routine setup, nothing urgent.",
+    "expect": {"org": "Customer", "bosch": "Operation", "bu_includes": "PT"}
+  },
+  {
+    "name": "bosch_escalation",
+    "subject": "URGENT: DCL pipeline down in PROD",
+    "from": "Mahmoud Zidan <mahmoud.zidan@de.bosch.com>",
+    "body": "The PT DCL data consolidation pipeline has been failing since this morning, the Power Tools B2B portals are not getting product data. Need help ASAP.",
+    "expect": {"org": "Customer", "type": "Action", "bosch": "Escalation", "bu_includes": "PT", "prio_max": "0"}
+  }
+]
