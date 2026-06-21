@@ -300,7 +300,8 @@ export interface Uco {
   implementation_strategy: string | null;
   ns_update_date: string | null;
   ob_update_date: string | null;
-  quality: number;            // 0–6
+  quality: number;            // 0–quality_max
+  quality_max: number;
   quality_missing: string[];  // rules failed (for the hover tooltip)
 }
 export interface UcoDetail {

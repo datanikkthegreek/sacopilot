@@ -36,17 +36,17 @@ def test_usecase_quality_scoring():
     import datetime as dt
     from sacopilot.backend import usecase_quality as q
     today = dt.date(2026, 6, 21)
-    # Full score: both artifacts dated today, strategy + status present.
-    full = q.compute("21/06/2026 - NS\n...", "20/06/2026 - NS\n...", "PS", "Green", today)
-    assert full["score"] == 6 and full["missing"] == []
-    # Empty onboarding -> allowed, no penalty (both onboarding rules pass).
-    part = q.compute("21/06/2026 - NS", "", "PS", "Green", today)
-    assert part["score"] == 6 and part["missing"] == []
-    # #keytechwin-only onboarding -> also allowed (singular or plural).
+    # Full score: artifacts dated today, strategy+status, status matches NS.
+    full = q.compute("21/06/2026 - NS\nStatus: AMBER - ok", "20/06/2026 - NS\n...", "PS", "Yellow", today)
+    assert full["score"] == 7 and full["max"] == 7 and full["missing"] == []
+    # Empty / #keytechwin onboarding allowed; NS status GREEN == SFDC Green.
     for t in ("#keytechwin", "  #KeyTechWins "):
-        tag = q.compute("21/06/2026 - NS", t, "PS", "Green", today)
-        assert tag["score"] == 6 and tag["missing"] == [], t
-    # Malformed onboarding date (real content) -> rule2 + rule4 fail; no
-    # strategy/status -> rules 5/6 fail; only rule1 (valid old NS date) passes.
+        tag = q.compute("21/06/2026 - NS\nStatus: GREEN", t, "PS", "Green", today)
+        assert tag["score"] == 7 and tag["missing"] == [], t
+    # Status mismatch: SFDC Green but Next Steps says RED -> rule 7 fails.
+    mm = q.compute("21/06/2026 - NS\nStatus: RED", "#keytechwin", "PS", "Green", today)
+    assert mm["score"] == 6
+    assert "Salesforce status matches Next Steps status (Amber=Yellow)" in mm["missing"]
+    # Malformed everything -> only rule1 (valid old NS date) passes.
     bad = q.compute("01/01/2020 - NS", "no date here", None, None, today)
     assert bad["score"] == 1

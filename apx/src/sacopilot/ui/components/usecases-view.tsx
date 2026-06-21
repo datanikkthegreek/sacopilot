@@ -14,16 +14,16 @@ function fmtDate(d: string | null): string {
   return m ? `${m[3]}/${m[2]}/${m[1]}` : d;
 }
 
-// Use-Case Quality 0–6; hover shows what's missing when below 6.
-function QualityBadge({ q, missing }: { q: number; missing: string[] }) {
-  const cls = q >= 6 ? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300"
-    : q >= 4 ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+// Use-Case Quality; hover shows what's missing when below max.
+function QualityBadge({ q, max, missing }: { q: number; max: number; missing: string[] }) {
+  const cls = q >= max ? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300"
+    : q >= max - 2 ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
     : "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300";
-  const tip = q >= 6 ? "Use-Case Quality 6/6 — all checks pass"
-    : "Missing (" + (6 - q) + "):\n" + missing.map((m) => "• " + m).join("\n");
+  const tip = q >= max ? `Use-Case Quality ${max}/${max} — all checks pass`
+    : "Missing (" + (max - q) + "):\n" + missing.map((m) => "• " + m).join("\n");
   return (
     <span className={`inline-block min-w-[34px] text-xs font-semibold px-2 py-0.5 rounded cursor-help ${cls}`} title={tip}>
-      {q}/6
+      {q}/{max}
     </span>
   );
 }
@@ -106,7 +106,7 @@ export function UseCasesView() {
             <tr>
               <th className="px-3 py-2">Name</th>
               <th className="px-2 py-2 w-12">Stage</th>
-              <th className="px-2 py-2 w-16 text-center" title="Use-Case Quality (0–6)">Quality</th>
+              <th className="px-2 py-2 w-16 text-center" title="Use-Case Quality (0–7)">Quality</th>
               <th className="px-2 py-2 w-24">NS updated</th>
               <th className="px-2 py-2 w-24">Onb. updated</th>
               <th className="px-2 py-2 w-24">Go-live</th>
@@ -121,7 +121,7 @@ export function UseCasesView() {
                 className={`border-b cursor-pointer hover:bg-muted/50 ${selId === u.id ? "bg-muted" : ""}`}>
                 <td className="px-3 py-2">{u.name}</td>
                 <td className="px-2 py-2"><span className={`text-[11px] px-1.5 py-0.5 rounded ${stageCls(u.stage)}`}>{u.stage}</span></td>
-                <td className="px-2 py-2 text-center"><QualityBadge q={u.quality} missing={u.quality_missing} /></td>
+                <td className="px-2 py-2 text-center"><QualityBadge q={u.quality} max={u.quality_max} missing={u.quality_missing} /></td>
                 <td className="px-2 py-2 text-muted-foreground whitespace-nowrap">{u.ns_update_date ?? "—"}</td>
                 <td className="px-2 py-2 text-muted-foreground whitespace-nowrap">{u.ob_update_date ?? "—"}</td>
                 <td className="px-2 py-2 text-muted-foreground whitespace-nowrap">{fmtDate(u.go_live_date)}</td>

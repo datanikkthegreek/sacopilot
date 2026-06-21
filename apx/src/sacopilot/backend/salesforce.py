@@ -96,6 +96,7 @@ def list_ucos(account: str = "Bosch Global", prefix: str = "[NS]") -> list[dict[
             "ns_update_date": q["ns_update_date"],
             "ob_update_date": q["ob_update_date"],
             "quality": q["score"],
+            "quality_max": q["max"],
             "quality_missing": q["missing"],
         })
     return out
