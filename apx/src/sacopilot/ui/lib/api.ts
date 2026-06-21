@@ -701,6 +701,46 @@ export function useMail_threads_api_mail_threads_getSuspense<TData = {
         ...options?.query
     });
 }
+export interface Meetings_categorize_api_meetings_categorize_postParams {
+    start?: string | null;
+}
+export const meetings_categorize_api_meetings_categorize_post = async (params?: Meetings_categorize_api_meetings_categorize_postParams, options?: RequestInit): Promise<{
+    data: unknown;
+}> =>{
+    const searchParams = new URLSearchParams();
+    if (params?.start != null) searchParams.set("start", String(params?.start));
+    const queryString = searchParams.toString();
+    const url = queryString ? `/api/meetings/categorize?${queryString}` : "/api/meetings/categorize";
+    const res = await fetch(url, {
+        ...options,
+        method: "POST"
+    });
+    if (!res.ok) {
+        const body = await res.text();
+        let parsed: unknown;
+        try {
+            parsed = JSON.parse(body);
+        } catch  {
+            parsed = body;
+        }
+        throw new ApiError(res.status, res.statusText, parsed);
+    }
+    return {
+        data: await res.json()
+    };
+};
+export function useMeetings_categorize_api_meetings_categorize_post(options?: {
+    mutation?: UseMutationOptions<{
+        data: unknown;
+    }, ApiError, {
+        params: Meetings_categorize_api_meetings_categorize_postParams;
+    }>;
+}) {
+    return useMutation({
+        mutationFn: (vars)=>meetings_categorize_api_meetings_categorize_post(vars.params),
+        ...options?.mutation
+    });
+}
 export const meetings_today_api_meetings_today_get = async (options?: RequestInit): Promise<{
     data: Record<string, unknown>[];
 }> =>{
