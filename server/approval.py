@@ -17,8 +17,6 @@ from typing import Any, Callable
 
 # Tools that mutate Gmail / the vault / create drafts. Everything else is read.
 EFFECTING_TOOLS = {
-    "gmail_apply_labels",
-    "gmail_ensure_labels",
     "gmail_create_draft",
     "commit_writes",
 }
@@ -78,17 +76,6 @@ manager = ApprovalManager()
 
 def summarize(tool: str, args: dict) -> str:
     """Human-readable one-liner describing what an effecting call will do."""
-    if tool == "gmail_apply_labels":
-        add = ", ".join(args.get("add", []) or [])
-        rem = ", ".join(args.get("remove", []) or [])
-        parts = []
-        if add:
-            parts.append(f"add [{add}]")
-        if rem:
-            parts.append(f"remove [{rem}]")
-        return f"Apply labels to message {args.get('message_id','?')[:12]}: " + "; ".join(parts)
-    if tool == "gmail_ensure_labels":
-        return "Create the SA Copilot label tree in Gmail (one-time)."
     if tool == "gmail_create_draft":
         return f"Create Gmail DRAFT to {args.get('to','?')} — \"{args.get('subject','')}\" (not sent)."
     if tool == "commit_writes":

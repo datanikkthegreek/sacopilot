@@ -36,8 +36,15 @@ GOOGLE_TOKEN_PATH = APP_HOME / "google-token.json"
 GOOGLE_CLIENT_SECRET_PATH = Path(
     os.environ.get("SACOPILOT_GOOGLE_CLIENT_SECRET", APP_HOME / "google-client-secret.json")
 ).expanduser()
-EMAIL_STATE_PATH = APP_HOME / "email-state.json"
-CORRECTIONS_PATH = APP_HOME / "corrections.json"
+
+# --- Lakebase (Databricks Postgres) — classification store -------------------
+# Classifications persist here (Gmail can't hold the taxonomy via the MCP). The
+# Postgres password is an OAuth credential minted by the Databricks CLI.
+LAKEBASE_PROFILE = os.environ.get("SACOPILOT_LAKEBASE_PROFILE", "DEFAULT")
+LAKEBASE_PROJECT = os.environ.get("SACOPILOT_LAKEBASE_PROJECT", "sacopilot")
+LAKEBASE_BRANCH = os.environ.get("SACOPILOT_LAKEBASE_BRANCH", "production")
+LAKEBASE_ENDPOINT = os.environ.get("SACOPILOT_LAKEBASE_ENDPOINT", "primary")
+LAKEBASE_DB = os.environ.get("SACOPILOT_LAKEBASE_DB", "sacopilot")
 
 # --- Obsidian vault (read-only context; reused .sync scripts) ----------------
 VAULT_REPO = Path(os.environ.get("SACOPILOT_VAULT_REPO", "~/Repos/obsidian")).expanduser()

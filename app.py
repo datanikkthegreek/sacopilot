@@ -25,12 +25,18 @@ app.add_middleware(
 
 @app.get("/health")
 def health() -> dict:
-    """Liveness + config sanity for the frontend to show setup state."""
+    """Liveness + config sanity for the frontend to show setup state.
+
+    Google is reached through the dbexec MCP server (already authenticated),
+    not an app-side OAuth token. `google_authed` reflects MCP reachability;
+    we probe lazily so /health stays fast and never blocks on startup.
+    """
+    from server import mcp_google
     return {
         "status": "ok",
         "model": config.MODEL,
         "anthropic_key": config.has_anthropic_key(),
-        "google_authed": config.GOOGLE_TOKEN_PATH.exists(),
+        "google_authed": mcp_google.is_available(),  # connects to the MCP server (slow only on first call)
         "vault_found": config.VAULT_ROOT.exists(),
         "voice_profile_found": config.VOICE_PROFILE_PATH.exists(),
     }

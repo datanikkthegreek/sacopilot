@@ -3,6 +3,12 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# Load local secrets (ANTHROPIC_BASE_URL / ANTHROPIC_API_KEY) if present.
+# .env is gitignored; never commit it.
+if [ -f .env ]; then
+  set -a; . ./.env; set +a
+fi
+
 cleanup() { kill 0 2>/dev/null || true; }
 trap cleanup EXIT
 
