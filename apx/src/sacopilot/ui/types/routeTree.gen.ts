@@ -9,8 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './../routes/__root'
+import { Route as UsecasesRouteImport } from './../routes/usecases'
+import { Route as MeetingsRouteImport } from './../routes/meetings'
+import { Route as MailRouteImport } from './../routes/mail'
 import { Route as IndexRouteImport } from './../routes/index'
 
+const UsecasesRoute = UsecasesRouteImport.update({
+  id: '/usecases',
+  path: '/usecases',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeetingsRoute = MeetingsRouteImport.update({
+  id: '/meetings',
+  path: '/meetings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MailRoute = MailRouteImport.update({
+  id: '/mail',
+  path: '/mail',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +37,61 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/mail': typeof MailRoute
+  '/meetings': typeof MeetingsRoute
+  '/usecases': typeof UsecasesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/mail': typeof MailRoute
+  '/meetings': typeof MeetingsRoute
+  '/usecases': typeof UsecasesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/mail': typeof MailRoute
+  '/meetings': typeof MeetingsRoute
+  '/usecases': typeof UsecasesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/mail' | '/meetings' | '/usecases'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/mail' | '/meetings' | '/usecases'
+  id: '__root__' | '/' | '/mail' | '/meetings' | '/usecases'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  MailRoute: typeof MailRoute
+  MeetingsRoute: typeof MeetingsRoute
+  UsecasesRoute: typeof UsecasesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/usecases': {
+      id: '/usecases'
+      path: '/usecases'
+      fullPath: '/usecases'
+      preLoaderRoute: typeof UsecasesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/meetings': {
+      id: '/meetings'
+      path: '/meetings'
+      fullPath: '/meetings'
+      preLoaderRoute: typeof MeetingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mail': {
+      id: '/mail'
+      path: '/mail'
+      fullPath: '/mail'
+      preLoaderRoute: typeof MailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +104,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  MailRoute: MailRoute,
+  MeetingsRoute: MeetingsRoute,
+  UsecasesRoute: UsecasesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
