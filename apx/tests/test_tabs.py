@@ -39,10 +39,13 @@ def test_usecase_quality_scoring():
     # Full score: both artifacts dated today, strategy + status present.
     full = q.compute("21/06/2026 - NS\n...", "20/06/2026 - NS\n...", "PS", "Green", today)
     assert full["score"] == 6 and full["missing"] == []
-    # Empty onboarding -> rule2 OK (NULL) but rule4 fails (not recent).
+    # Empty onboarding -> allowed, no penalty (both onboarding rules pass).
     part = q.compute("21/06/2026 - NS", "", "PS", "Green", today)
-    assert part["score"] == 5
-    assert "Onboarding updated within the last 8 days" in part["missing"]
-    # Malformed onboarding date -> rule2 + rule4 fail; no strategy/status -> rules 5/6 fail.
+    assert part["score"] == 6 and part["missing"] == []
+    # #keytechwins-only onboarding -> also allowed.
+    tag = q.compute("21/06/2026 - NS", "  #KeyTechWins ", "PS", "Green", today)
+    assert tag["score"] == 6 and tag["missing"] == []
+    # Malformed onboarding date (real content) -> rule2 + rule4 fail; no
+    # strategy/status -> rules 5/6 fail; only rule1 (valid old NS date) passes.
     bad = q.compute("01/01/2020 - NS", "no date here", None, None, today)
-    assert bad["score"] == 1  # only rule1 (valid old NS date) passes
+    assert bad["score"] == 1

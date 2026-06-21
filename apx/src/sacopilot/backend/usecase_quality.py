@@ -39,17 +39,28 @@ def _recent(date: _dt.date | None, today: _dt.date, days: int = 8) -> bool:
     return date is not None and date >= today - _dt.timedelta(days=days)
 
 
+def onboarding_blank(text: str | None) -> bool:
+    """Onboarding Notes count as 'allowed/blank' (no quality penalty) when they
+    are empty or contain only the #keytechwins tag."""
+    if not text or not text.strip():
+        return True
+    cleaned = re.sub(r"#?keytechwins", "", text, flags=re.IGNORECASE).strip()
+    return cleaned == ""
+
+
 def compute(ns_text: str | None, ob_text: str | None,
             strategy: str | None, status: str | None,
             today: _dt.date | None = None) -> dict:
     today = today or _dt.date.today()
     ns_date, ns_ok = parse_update_date(ns_text)
     ob_date, ob_ok = parse_update_date(ob_text)
+    # Empty / #keytechwins-only Onboarding Notes are allowed — no penalty.
+    ob_allowed = onboarding_blank(ob_text)
     rules = [
         ("Next Steps date is a valid DD/MM/YYYY", ns_ok),
-        ("Onboarding date is a valid DD/MM/YYYY", ob_ok),
+        ("Onboarding date is a valid DD/MM/YYYY", ob_ok or ob_allowed),
         ("Next Steps updated within the last 8 days", _recent(ns_date, today)),
-        ("Onboarding updated within the last 8 days", _recent(ob_date, today)),
+        ("Onboarding updated within the last 8 days", _recent(ob_date, today) or ob_allowed),
         ("Implementation strategy is set", bool(strategy and str(strategy).strip())),
         ("Implementation status is set", bool(status and str(status).strip())),
     ]
