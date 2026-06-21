@@ -74,7 +74,7 @@ def list_ucos(account: str = "Bosch Global", prefix: str = "[NS]") -> list[dict[
 
     stages = ",".join(f"'{s}'" for s in _ACTIVE_STAGES)
     soql = (
-        "SELECT Id, Name, Stages__c, Account__r.Name, Go_Live_Date__c, "
+        "SELECT Id, Name, Stages__c, Account__r.Name, OriginalGoLiveMonth__c, "
         "Implementation_Start_Date__c, Implementation_Status__c, "
         "Implementation_Strategy__c, Demand_Plan_Next_Steps__c, Implementation_Notes__c "
         f"FROM UseCase__c WHERE Account__r.Name LIKE '%{_esc(account)}%' "
@@ -89,7 +89,7 @@ def list_ucos(account: str = "Bosch Global", prefix: str = "[NS]") -> list[dict[
         out.append({
             "id": r.get("Id"), "name": r.get("Name"), "stage": r.get("Stages__c"),
             "account": (r.get("Account__r") or {}).get("Name"),
-            "go_live_date": r.get("Go_Live_Date__c"),
+            "go_live_date": r.get("OriginalGoLiveMonth__c"),
             "onboarding_date": r.get("Implementation_Start_Date__c"),
             "implementation_status": r.get("Implementation_Status__c"),
             "implementation_strategy": r.get("Implementation_Strategy__c"),
