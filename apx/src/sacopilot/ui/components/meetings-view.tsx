@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CalEvent, getWeek } from "@/lib/cockpit-api";
+import { CalEvent, getWeek, categorizeWeek } from "@/lib/cockpit-api";
 
 // Google Calendar event-color palette (colorId -> hex). null -> default blue.
 const GCAL: Record<string, string> = {
@@ -44,14 +44,33 @@ export function MeetingsView() {
   const [sel, setSel] = useState<CalEvent | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [cat, setCat] = useState<{ done: number; total: number } | null>(null);
 
-  useEffect(() => {
+  function load() {
     setLoading(true); setError(null);
     getWeek(isoDay(monday))
       .then((w) => setEvents(w.events))
       .catch((e) => setError(String(e)))
       .finally(() => setLoading(false));
-  }, [monday]);
+  }
+  useEffect(() => { load(); }, [monday]);
+
+  async function categorizeNow() {
+    setError(null); setCat({ done: 0, total: 0 });
+    try {
+      await categorizeWeek(isoDay(monday), (e) => {
+        if (e.type === "start") setCat({ done: 0, total: e.total });
+        else if (e.type === "progress") setCat({ done: e.done, total: e.total });
+        else if (e.type === "item_error") setCat((c) => c && { ...c, done: e.done });
+        else if (e.type === "error") setError(e.message);
+      });
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setCat(null);
+      load(); // refresh so the new colours show
+    }
+  }
 
   const days = Array.from({ length: 5 }, (_, i) => {
     const d = new Date(monday); d.setDate(d.getDate() + i); return d;
@@ -123,6 +142,10 @@ export function MeetingsView() {
           <Button size="sm" variant="outline" onClick={() => shift(1)}>Next ›</Button>
           <span className="text-sm font-medium ml-2">{fmtRange}</span>
           {loading && <span className="text-[11px] text-muted-foreground ml-2">loading…</span>}
+          <Button size="sm" className="ml-auto" disabled={cat !== null} onClick={categorizeNow}
+            title="Auto-categorise uncoloured events (Customer External/Internal, Databricks Internal, Preps, Private) and write the colour back to Google. Manual colours are untouched.">
+            {cat ? `Categorising… ${cat.done}/${cat.total}` : "Auto-categorise"}
+          </Button>
         </div>
 
         {/* Category (color) filter */}

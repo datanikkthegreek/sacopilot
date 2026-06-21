@@ -291,6 +291,18 @@ export async function getWeek(start?: string): Promise<WeekResponse> {
   return r.json();
 }
 
+export type CategorizeEvent =
+  | { type: "start"; total: number }
+  | { type: "progress"; done: number; total: number; event_id: string; summary: string; category: string }
+  | { type: "item_error"; done: number; total: number; event_id: string; message: string }
+  | { type: "done"; total: number }
+  | { type: "error"; message: string };
+
+// Auto-categorise uncoloured events in the week; writes colours back to Google.
+export async function categorizeWeek(start: string, onEvent: (e: CategorizeEvent) => void): Promise<void> {
+  await streamSse(`/api/meetings/categorize?start=${start}`, (o) => onEvent(o as CategorizeEvent));
+}
+
 // --- Use-Cases (Salesforce UCOs) -------------------------------------------
 export interface Uco {
   id: string; name: string; stage: string; account: string;

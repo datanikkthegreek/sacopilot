@@ -105,6 +105,15 @@ def calendar_list(start_iso: str | None = None, end_iso: str | None = None,
     return out
 
 
+def calendar_set_color(event_id: str, color_id: str) -> dict[str, Any]:
+    """Set an event's color (category). send_updates=none so guests aren't
+    notified by a recolour. EFFECTING."""
+    mcp_google.call_tool("calendar_event_update", {
+        "event_id": event_id, "color_id": color_id, "send_updates": "none",
+    })
+    return {"event_id": event_id, "color_id": color_id}
+
+
 # --- Gmail (read) ------------------------------------------------------------
 
 def _header(headers: list[dict], name: str) -> str:

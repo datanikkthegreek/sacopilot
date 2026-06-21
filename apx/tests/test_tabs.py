@@ -50,3 +50,40 @@ def test_usecase_quality_scoring():
     # Malformed everything -> only rule1 (valid old NS date) passes.
     bad = q.compute("01/01/2020 - NS", "no date here", None, None, today)
     assert bad["score"] == 1
+
+
+def test_meeting_categorize_external_and_mapping():
+    from sacopilot.backend import meeting_categorize as mc
+    # External detection covers all Bosch sub-domains (non-databricks = external).
+    db_only = [{"email": "a@databricks.com"}, {"email": "b@databricks.com"}]
+    assert mc.has_external(db_only) is False
+    for dom in ("bosch.com", "de.bosch.com", "bshg.com", "boschrexroth.com"):
+        assert mc.has_external(db_only + [{"email": f"x@{dom}"}]) is True, dom
+    # Category <-> colorId round-trips and matches the meetings-view palette.
+    assert mc.CAT_TO_COLOR["Customer External"] == "6"
+    assert mc.COLOR_TO_CAT["10"] == "Databricks Internal"
+    assert mc.classify([], []) == {}
+
+
+def test_meeting_categorize_parsing(monkeypatch):
+    from sacopilot.backend import meeting_categorize as mc
+
+    class _Blk:
+        type = "text"
+        text = '[{"i":0,"category":"Private"},{"i":1,"category":"Bogus"},{"i":9,"category":"Preps"}]'
+
+    class _Resp:
+        content = [_Blk()]
+
+    class _Msgs:
+        def create(self, **kw):
+            return _Resp()
+
+    class _Client:
+        messages = _Msgs()
+
+    monkeypatch.setattr(mc, "_anthropic", lambda: _Client())
+    out = mc.classify([{"id": "e1", "summary": "Lunch", "attendees": []},
+                       {"id": "e2", "summary": "x", "attendees": []}], [])
+    # index 0 valid; index 1 invalid category dropped; index 9 out of range dropped.
+    assert out == {"e1": "Private"}
