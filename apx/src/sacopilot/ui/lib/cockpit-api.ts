@@ -292,8 +292,19 @@ export async function getWeek(start?: string): Promise<WeekResponse> {
 }
 
 // --- Use-Cases (Salesforce UCOs) -------------------------------------------
-export interface Uco { id: string; name: string; stage: string; account: string; owner: string; }
-export interface UcoDetail extends Uco {
+export interface Uco {
+  id: string; name: string; stage: string; account: string;
+  go_live_date: string | null;
+  onboarding_date: string | null;
+  implementation_status: string | null;
+  implementation_strategy: string | null;
+  ns_update_date: string | null;
+  ob_update_date: string | null;
+  quality: number;            // 0–6
+  quality_missing: string[];  // rules failed (for the hover tooltip)
+}
+export interface UcoDetail {
+  id: string; name: string; stage: string; account: string;
   description: string | null;
   start_date: string | null;
   go_live_date: string | null;

@@ -30,3 +30,19 @@ def test_unknown_artifact_rejected():
     import pytest
     with pytest.raises(ValueError):
         usecase_gen.generate("bogus", {"stage": "U3"}, "01/01/2026", "")
+
+
+def test_usecase_quality_scoring():
+    import datetime as dt
+    from sacopilot.backend import usecase_quality as q
+    today = dt.date(2026, 6, 21)
+    # Full score: both artifacts dated today, strategy + status present.
+    full = q.compute("21/06/2026 - NS\n...", "20/06/2026 - NS\n...", "PS", "Green", today)
+    assert full["score"] == 6 and full["missing"] == []
+    # Empty onboarding -> rule2 OK (NULL) but rule4 fails (not recent).
+    part = q.compute("21/06/2026 - NS", "", "PS", "Green", today)
+    assert part["score"] == 5
+    assert "Onboarding updated within the last 8 days" in part["missing"]
+    # Malformed onboarding date -> rule2 + rule4 fail; no strategy/status -> rules 5/6 fail.
+    bad = q.compute("01/01/2020 - NS", "no date here", None, None, today)
+    assert bad["score"] == 1  # only rule1 (valid old NS date) passes

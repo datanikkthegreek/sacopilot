@@ -7,6 +7,27 @@ const stageCls = (s: string) =>
      U4: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
      U5: "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300" } as Record<string, string>)[s] ?? "bg-muted";
 
+// SFDC date (YYYY-MM-DD) -> DD/MM/YYYY for display.
+function fmtDate(d: string | null): string {
+  if (!d) return "—";
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : d;
+}
+
+// Use-Case Quality 0–6; hover shows what's missing when below 6.
+function QualityBadge({ q, missing }: { q: number; missing: string[] }) {
+  const cls = q >= 6 ? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300"
+    : q >= 4 ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+    : "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300";
+  const tip = q >= 6 ? "Use-Case Quality 6/6 — all checks pass"
+    : "Missing (" + (6 - q) + "):\n" + missing.map((m) => "• " + m).join("\n");
+  return (
+    <span className={`inline-block min-w-[34px] text-xs font-semibold px-2 py-0.5 rounded cursor-help ${cls}`} title={tip}>
+      {q}/6
+    </span>
+  );
+}
+
 export function UseCasesView() {
   const [account, setAccount] = useState("Bosch Global");
   const [prefix, setPrefix] = useState("[NS]");
@@ -82,20 +103,35 @@ export function UseCasesView() {
         {/* Table */}
         <table className="w-full text-sm">
           <thead className="text-left text-xs text-muted-foreground border-b sticky top-0 bg-background">
-            <tr><th className="px-3 py-2">Name</th><th className="px-3 py-2 w-16">Stage</th><th className="px-3 py-2">Account</th><th className="px-3 py-2">Owner</th></tr>
+            <tr>
+              <th className="px-3 py-2">Name</th>
+              <th className="px-2 py-2 w-12">Stage</th>
+              <th className="px-2 py-2 w-16 text-center" title="Use-Case Quality (0–6)">Quality</th>
+              <th className="px-2 py-2 w-24">NS updated</th>
+              <th className="px-2 py-2 w-24">Onb. updated</th>
+              <th className="px-2 py-2 w-24">Go-live</th>
+              <th className="px-2 py-2 w-24">Onboarding</th>
+              <th className="px-2 py-2 w-20">Status</th>
+              <th className="px-2 py-2">Strategy</th>
+            </tr>
           </thead>
           <tbody>
             {ucos.map((u) => (
               <tr key={u.id} onClick={() => setSelId(u.id)}
                 className={`border-b cursor-pointer hover:bg-muted/50 ${selId === u.id ? "bg-muted" : ""}`}>
                 <td className="px-3 py-2">{u.name}</td>
-                <td className="px-3 py-2"><span className={`text-[11px] px-1.5 py-0.5 rounded ${stageCls(u.stage)}`}>{u.stage}</span></td>
-                <td className="px-3 py-2 text-muted-foreground">{u.account}</td>
-                <td className="px-3 py-2 text-muted-foreground">{u.owner}</td>
+                <td className="px-2 py-2"><span className={`text-[11px] px-1.5 py-0.5 rounded ${stageCls(u.stage)}`}>{u.stage}</span></td>
+                <td className="px-2 py-2 text-center"><QualityBadge q={u.quality} missing={u.quality_missing} /></td>
+                <td className="px-2 py-2 text-muted-foreground whitespace-nowrap">{u.ns_update_date ?? "—"}</td>
+                <td className="px-2 py-2 text-muted-foreground whitespace-nowrap">{u.ob_update_date ?? "—"}</td>
+                <td className="px-2 py-2 text-muted-foreground whitespace-nowrap">{fmtDate(u.go_live_date)}</td>
+                <td className="px-2 py-2 text-muted-foreground whitespace-nowrap">{fmtDate(u.onboarding_date)}</td>
+                <td className="px-2 py-2 text-muted-foreground">{u.implementation_status ?? "—"}</td>
+                <td className="px-2 py-2 text-muted-foreground">{u.implementation_strategy ?? "—"}</td>
               </tr>
             ))}
             {ucos.length === 0 && !loading && (
-              <tr><td colSpan={4} className="px-3 py-8 text-center text-muted-foreground">No use-cases. Adjust the filter and Load.</td></tr>
+              <tr><td colSpan={9} className="px-3 py-8 text-center text-muted-foreground">No use-cases. Adjust the filter and Load.</td></tr>
             )}
           </tbody>
         </table>

@@ -68,18 +68,37 @@ def _esc(s: str) -> str:
 
 
 def list_ucos(account: str = "Bosch Global", prefix: str = "[NS]") -> list[dict[str, Any]]:
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    from sacopilot.backend import usecase_quality
+
     stages = ",".join(f"'{s}'" for s in _ACTIVE_STAGES)
     soql = (
-        f"SELECT Id, Name, Stages__c, Account__r.Name, Owner.Name FROM UseCase__c "
-        f"WHERE Account__r.Name LIKE '%{_esc(account)}%' AND Name LIKE '{_esc(prefix)}%' "
-        f"AND Stages__c IN ({stages}) ORDER BY Name"
+        "SELECT Id, Name, Stages__c, Account__r.Name, Go_Live_Date__c, "
+        "Implementation_Start_Date__c, Implementation_Status__c, "
+        "Implementation_Strategy__c, Demand_Plan_Next_Steps__c, Implementation_Notes__c "
+        f"FROM UseCase__c WHERE Account__r.Name LIKE '%{_esc(account)}%' "
+        f"AND Name LIKE '{_esc(prefix)}%' AND Stages__c IN ({stages}) ORDER BY Name"
     )
-    return [
-        {"id": r.get("Id"), "name": r.get("Name"), "stage": r.get("Stages__c"),
-         "account": (r.get("Account__r") or {}).get("Name"),
-         "owner": (r.get("Owner") or {}).get("Name")}
-        for r in _query(soql)
-    ]
+    today = datetime.now(ZoneInfo("Europe/Berlin")).date()
+    out = []
+    for r in _query(soql):
+        q = usecase_quality.compute(
+            r.get("Demand_Plan_Next_Steps__c"), r.get("Implementation_Notes__c"),
+            r.get("Implementation_Strategy__c"), r.get("Implementation_Status__c"), today)
+        out.append({
+            "id": r.get("Id"), "name": r.get("Name"), "stage": r.get("Stages__c"),
+            "account": (r.get("Account__r") or {}).get("Name"),
+            "go_live_date": r.get("Go_Live_Date__c"),
+            "onboarding_date": r.get("Implementation_Start_Date__c"),
+            "implementation_status": r.get("Implementation_Status__c"),
+            "implementation_strategy": r.get("Implementation_Strategy__c"),
+            "ns_update_date": q["ns_update_date"],
+            "ob_update_date": q["ob_update_date"],
+            "quality": q["score"],
+            "quality_missing": q["missing"],
+        })
+    return out
 
 
 def get_uco(uco_id: str) -> dict[str, Any]:
