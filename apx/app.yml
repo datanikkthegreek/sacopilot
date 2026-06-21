@@ -1,0 +1,1 @@
+command: ["uvicorn", "sacopilot.backend.app:app", "--workers", "2"]
