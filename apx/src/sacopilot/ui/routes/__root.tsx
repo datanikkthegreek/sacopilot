@@ -4,7 +4,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { createRootRouteWithContext, Outlet, Link } from "@tanstack/react-router";
 import { Toaster } from "sonner";
 
-const TABS = [["/mail", "Mail"], ["/meetings", "Meetings"], ["/usecases", "Use-Cases"]] as const;
+const TABS = [["/mail", "Mail"], ["/meetings", "Meetings"], ["/usecases", "Use-Cases"], ["/board", "Board"]] as const;
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;

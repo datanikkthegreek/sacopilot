@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './../routes/__root'
 import { Route as UsecasesRouteImport } from './../routes/usecases'
 import { Route as MeetingsRouteImport } from './../routes/meetings'
 import { Route as MailRouteImport } from './../routes/mail'
+import { Route as BoardRouteImport } from './../routes/board'
 import { Route as IndexRouteImport } from './../routes/index'
 
 const UsecasesRoute = UsecasesRouteImport.update({
@@ -29,6 +30,11 @@ const MailRoute = MailRouteImport.update({
   path: '/mail',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BoardRoute = BoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -37,12 +43,14 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/board': typeof BoardRoute
   '/mail': typeof MailRoute
   '/meetings': typeof MeetingsRoute
   '/usecases': typeof UsecasesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/board': typeof BoardRoute
   '/mail': typeof MailRoute
   '/meetings': typeof MeetingsRoute
   '/usecases': typeof UsecasesRoute
@@ -50,20 +58,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/board': typeof BoardRoute
   '/mail': typeof MailRoute
   '/meetings': typeof MeetingsRoute
   '/usecases': typeof UsecasesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/mail' | '/meetings' | '/usecases'
+  fullPaths: '/' | '/board' | '/mail' | '/meetings' | '/usecases'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/mail' | '/meetings' | '/usecases'
-  id: '__root__' | '/' | '/mail' | '/meetings' | '/usecases'
+  to: '/' | '/board' | '/mail' | '/meetings' | '/usecases'
+  id: '__root__' | '/' | '/board' | '/mail' | '/meetings' | '/usecases'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BoardRoute: typeof BoardRoute
   MailRoute: typeof MailRoute
   MeetingsRoute: typeof MeetingsRoute
   UsecasesRoute: typeof UsecasesRoute
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MailRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/board': {
+      id: '/board'
+      path: '/board'
+      fullPath: '/board'
+      preLoaderRoute: typeof BoardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,6 +121,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BoardRoute: BoardRoute,
   MailRoute: MailRoute,
   MeetingsRoute: MeetingsRoute,
   UsecasesRoute: UsecasesRoute,

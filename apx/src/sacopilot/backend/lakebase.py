@@ -377,3 +377,59 @@ def recent_adjusted(limit: int = 8) -> list[dict]:
          "bosch": r["bosch"], "bu": r["bu"] or []}
         for r in rows
     ]
+
+
+# --- Action board (todos) ----------------------------------------------------
+
+_TODO_COLS = ("id, title, description, status, priority, estimate_hours, type, "
+              "use_case_id, use_case_name, bu, project, tags, created_at, updated_at")
+_TODO_FIELDS = ("title", "description", "status", "priority", "estimate_hours",
+                "type", "use_case_id", "use_case_name", "bu", "project", "tags")
+
+
+def list_todos() -> list[dict]:
+    """All todos, ordered for the board: P0 first, then most-recently-updated."""
+    with _connect() as c:
+        c.row_factory = dict_row
+        return c.execute(
+            f"SELECT {_TODO_COLS} FROM todos ORDER BY priority ASC, updated_at DESC"
+        ).fetchall()
+
+
+def create_todo(fields: dict, todo_id: str) -> dict:
+    row = {"id": todo_id, **{k: fields.get(k) for k in _TODO_FIELDS}}
+    row["title"] = row.get("title") or "(untitled)"
+    row["status"] = row.get("status") or "Open"
+    row["priority"] = str(row.get("priority") or "2")
+    row["tags"] = row.get("tags") or []
+    with _connect() as c:
+        c.row_factory = dict_row
+        return c.execute(
+            f"INSERT INTO todos (id, {', '.join(_TODO_FIELDS)}) "
+            f"VALUES (%(id)s, {', '.join('%(' + f + ')s' for f in _TODO_FIELDS)}) "
+            f"RETURNING {_TODO_COLS}", row
+        ).fetchone()
+
+
+def update_todo(todo_id: str, fields: dict) -> dict:
+    """Update any subset of fields (incl. status, for moving columns)."""
+    sets = [f for f in _TODO_FIELDS if f in fields]
+    if not sets:
+        raise RuntimeError("nothing to update")
+    params = {f: fields[f] for f in sets}
+    params["id"] = todo_id
+    assigns = ", ".join(f"{f} = %({f})s" for f in sets) + ", updated_at = now()"
+    with _connect() as c:
+        c.row_factory = dict_row
+        r = c.execute(f"UPDATE todos SET {assigns} WHERE id = %(id)s RETURNING {_TODO_COLS}",
+                      params).fetchone()
+    if not r:
+        raise RuntimeError(f"todo {todo_id} not found")
+    return r
+
+
+def delete_todo(todo_id: str) -> bool:
+    with _connect() as c:
+        n = c.execute("DELETE FROM todos WHERE id = %s", (todo_id,)).rowcount
+        c.commit()
+    return bool(n)
