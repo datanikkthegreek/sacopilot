@@ -357,3 +357,57 @@ export async function updateUco(id: string, fields: { next_steps?: string; onboa
   if (!r.ok) throw new Error(await _detail(r, `usecases update ${r.status}`));
   return r.json();
 }
+
+// --- Action Board (todos) --------------------------------------------------
+export interface Todo {
+  id: string;
+  title: string;
+  description: string | null;
+  status: string;
+  priority: string;            // "0" | "1" | "2"
+  estimate_hours: number | null;
+  type: string | null;         // Bosch | Internal | Enablement
+  use_case_id: string | null;
+  use_case_name: string | null;
+  bu: string | null;
+  project: string | null;
+  tags: string[];
+  created_at: string;
+  updated_at: string;
+}
+export interface BoardMeta {
+  statuses: string[]; types: string[]; priorities: string[];
+  bu: string[]; use_cases: { id: string; name: string }[];
+}
+export type TodoInput = Partial<Omit<Todo, "id" | "created_at" | "updated_at">>;
+
+export async function listTodos(): Promise<Todo[]> {
+  const r = await fetch("/api/board/todos");
+  if (!r.ok) throw new Error(`board/todos ${r.status}`);
+  return (await r.json()).todos;
+}
+export async function boardMeta(): Promise<BoardMeta> {
+  const r = await fetch("/api/board/meta");
+  if (!r.ok) throw new Error(`board/meta ${r.status}`);
+  return r.json();
+}
+export async function createTodo(fields: TodoInput): Promise<Todo> {
+  const r = await fetch("/api/board/todos", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(fields),
+  });
+  if (!r.ok) throw new Error(`create todo ${r.status}`);
+  return r.json();
+}
+export async function updateTodo(id: string, fields: TodoInput): Promise<Todo> {
+  const r = await fetch(`/api/board/todos/${encodeURIComponent(id)}`, {
+    method: "PUT", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(fields),
+  });
+  if (!r.ok) throw new Error(`update todo ${r.status}`);
+  return r.json();
+}
+export async function deleteTodo(id: string): Promise<void> {
+  const r = await fetch(`/api/board/todos/${encodeURIComponent(id)}`, { method: "DELETE" });
+  if (!r.ok) throw new Error(`delete todo ${r.status}`);
+}
