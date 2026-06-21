@@ -7,8 +7,6 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
-from server import taxonomy
-from server.tools import classify as _classify
 from server.tools import google as _g
 from server.tools import gmail_write as _gw
 from server.tools import vault as _v
@@ -43,37 +41,6 @@ TOOLS: list[dict[str, Any]] = [
         "input_schema": {
             "type": "object",
             "properties": {"message_id": {"type": "string"}},
-            "required": ["message_id"],
-        },
-    },
-    {
-        "name": "classify_email",
-        "description": "Classify an email into the 6-facet taxonomy (Type/Org/Prio/DBX/Bosch/BU + confidence). Returns facets and the Gmail label names to apply.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "subject": {"type": "string"},
-                "sender": {"type": "string"},
-                "body": {"type": "string"},
-            },
-            "required": ["subject", "sender", "body"],
-        },
-    },
-    {
-        "name": "gmail_ensure_labels",
-        "description": "Create the SA Copilot nested label tree in Gmail (one-time, idempotent). EFFECTING.",
-        "input_schema": {"type": "object", "properties": {}},
-    },
-    {
-        "name": "gmail_apply_labels",
-        "description": "Apply/remove labels on a Gmail message by label name (e.g. 'Type/Action', 'BU/PT'). Writes back to Gmail. EFFECTING.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "message_id": {"type": "string"},
-                "add": {"type": "array", "items": {"type": "string"}},
-                "remove": {"type": "array", "items": {"type": "string"}},
-            },
             "required": ["message_id"],
         },
     },
@@ -174,18 +141,10 @@ TOOLS: list[dict[str, Any]] = [
 
 
 # --- Dispatch ----------------------------------------------------------------
-def _classify_tool(subject: str, sender: str, body: str) -> dict:
-    from server import state
-    return _classify.classify_email(subject, sender, body, examples=state.load_corrections())
-
-
 DISPATCH: dict[str, Callable[..., Any]] = {
     "calendar_list": _g.calendar_list,
     "gmail_list_messages": _g.gmail_list_messages,
     "gmail_get_message": _g.gmail_get_message,
-    "classify_email": _classify_tool,
-    "gmail_ensure_labels": _gw.gmail_ensure_labels,
-    "gmail_apply_labels": _gw.gmail_apply_labels,
     "gmail_create_draft": _gw.gmail_create_draft,
     "drive_find_meeting_doc": _g.drive_find_meeting_doc,
     "docs_export": _g.docs_export,

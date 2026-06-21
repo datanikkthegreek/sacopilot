@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
 
-from server import google_client
+from server import mcp_google
 from server.tools import google
 
 router = APIRouter()
@@ -11,6 +11,6 @@ router = APIRouter()
 
 @router.get("/meetings/today")
 def meetings_today() -> list[dict]:
-    if not google_client.is_authorized():
-        raise HTTPException(503, "Google not authorized. Run: uv run python -m server.google_client auth")
+    if not mcp_google.is_available():
+        raise HTTPException(503, "Google MCP server unavailable (dbexec). Check your Databricks CLI session.")
     return google.calendar_list()

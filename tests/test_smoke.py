@@ -16,7 +16,10 @@ def test_app_imports_and_routes_mount():
     for expected in [
         "/health",
         "/api/agent/message", "/api/agent/approve", "/api/agent/pending",
-        "/api/mail/list", "/api/meetings/today",
+        "/api/mail/threads", "/api/mail/thread/{thread_id}", "/api/mail/sync",
+        "/api/mail/taxonomy", "/api/mail/classify",
+        "/api/mail/classify/{thread_id}", "/api/mail/status/{thread_id}",
+        "/api/mail/reply/{thread_id}", "/api/meetings/today",
     ]:
         assert expected in paths, f"missing route {expected}"
 
@@ -40,7 +43,11 @@ def test_effecting_tools_are_registered_and_gated():
 
 
 def test_read_tools_gate_without_google():
+    from server import mcp_google
     from server.tools import google
     import pytest
+    # Only meaningful when the dbexec MCP is NOT reachable; skip if it is live.
+    if mcp_google.is_available():
+        pytest.skip("dbexec Google MCP is available in this environment")
     with pytest.raises(RuntimeError):
         google.calendar_list()
