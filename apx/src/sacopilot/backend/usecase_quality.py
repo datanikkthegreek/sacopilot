@@ -41,10 +41,10 @@ def _recent(date: _dt.date | None, today: _dt.date, days: int = 8) -> bool:
 
 def onboarding_blank(text: str | None) -> bool:
     """Onboarding Notes count as 'allowed/blank' (no quality penalty) when they
-    are empty or contain only the #keytechwins tag."""
+    are empty or contain only the #keytechwin tag (with/without trailing 's')."""
     if not text or not text.strip():
         return True
-    cleaned = re.sub(r"#?keytechwins", "", text, flags=re.IGNORECASE).strip()
+    cleaned = re.sub(r"#?keytechwins?", "", text, flags=re.IGNORECASE).strip()
     return cleaned == ""
 
 

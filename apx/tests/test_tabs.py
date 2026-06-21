@@ -42,9 +42,10 @@ def test_usecase_quality_scoring():
     # Empty onboarding -> allowed, no penalty (both onboarding rules pass).
     part = q.compute("21/06/2026 - NS", "", "PS", "Green", today)
     assert part["score"] == 6 and part["missing"] == []
-    # #keytechwins-only onboarding -> also allowed.
-    tag = q.compute("21/06/2026 - NS", "  #KeyTechWins ", "PS", "Green", today)
-    assert tag["score"] == 6 and tag["missing"] == []
+    # #keytechwin-only onboarding -> also allowed (singular or plural).
+    for t in ("#keytechwin", "  #KeyTechWins "):
+        tag = q.compute("21/06/2026 - NS", t, "PS", "Green", today)
+        assert tag["score"] == 6 and tag["missing"] == [], t
     # Malformed onboarding date (real content) -> rule2 + rule4 fail; no
     # strategy/status -> rules 5/6 fail; only rule1 (valid old NS date) passes.
     bad = q.compute("01/01/2020 - NS", "no date here", None, None, today)
